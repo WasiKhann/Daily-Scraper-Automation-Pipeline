@@ -1,34 +1,38 @@
 import random
-import re
 
-# Read entire file as one string
+# Step 1: Read lines
 with open("notion.txt", "r", encoding="utf-8") as f:
-    content = f.read()
+    lines = f.readlines()
 
-# Normalize line endings
-content = content.replace("\r\n", "\n").replace("\r", "\n")
+# Step 2: Group snippets manually
+snippets = []
+current_snippet = []
 
-# Remove header/footer markers if present
-content = re.sub(r"-------- NOTION\.TXT START --------", "", content)
-content = re.sub(r"-------- NOTION\.TXT END ----------", "", content)
+for line in lines:
+    if line.rstrip("\n") in ("..", ".. "):  # exact match, preserving space
+        if current_snippet:
+            snippet = "".join(current_snippet).strip()
+            if snippet:
+                snippets.append(snippet)
+            current_snippet = []
+    else:
+        current_snippet.append(line)
 
-# Split content using regex that finds any line starting with `..`
-snippets = re.split(r"\n\s*\.\.\s*\n", content)
+# Step 3: Catch the last block if needed
+if current_snippet:
+    snippet = "".join(current_snippet).strip()
+    if snippet:
+        snippets.append(snippet)
 
-# Clean and filter out empty ones
-snippets = [s.strip() for s in snippets if s.strip()]
-
-# Debug: show total and pick one
-print(f"🧪 Found {len(snippets)} valid snippets.\n")
-
+# Step 4: Confirm and pick one
 if not snippets:
-    raise ValueError("❌ No valid snippets found. Check your `..` separator format.")
+    raise Exception("❌ No snippets found. Check your separator format.")
 
+print(f"🧪 Found {len(snippets)} valid snippets.\n")
 chosen = random.choice(snippets)
-
 print("🎯 Selected snippet:\n")
 print(chosen)
 
-# Save to picked_snippet.txt
+# Step 5: Save chosen snippet to file
 with open("picked_snippet.txt", "w", encoding="utf-8") as f:
     f.write(chosen)
