@@ -1,36 +1,34 @@
-import smtplib
-import os
-import random
+import smtplib, ssl, os, random
 from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
 
-# Load scraped content
+EMAIL_USER = os.getenv("EMAIL_USER")
+EMAIL_PASS = os.getenv("EMAIL_PASS")
+EMAIL_RECEIVER = os.getenv("EMAIL_RECEIVER")
+
+# Read and split Notion content
 with open("notion.txt", "r", encoding="utf-8") as f:
-    all_text = f.read()
+    raw = f.read()
+    # Split using the ".." separator with line breaks normalized
+    blocks = [block.strip() for block in raw.split("..") if block.strip()]
 
-# 🔹 Split on custom delimiter: two periods
-snippets = [s.strip() for s in all_text.split("..") if s.strip()]
+# Pick one snippet randomly
+snippet = random.choice(blocks)
 
-# Randomly select one
-chosen = random.choice(snippets)
-
-# Email credentials from GitHub Secrets
-sender = os.environ["EMAIL_USER"]
-password = os.environ["EMAIL_PASS"]
-receiver = os.environ["EMAIL_RECEIVER"]
-
-# Create the email message
-msg = MIMEText(chosen)
+# Compose the email
+msg = MIMEMultipart()
+msg["From"] = EMAIL_USER
+msg["To"] = EMAIL_RECEIVER
 msg["Subject"] = "🌙 Your Daily Islamic Reminder"
-msg["From"] = sender
-msg["To"] = receiver
+
+msg.attach(MIMEText(snippet, "plain"))
 
 # Send the email
-try:
-    with smtplib.SMTP("smtp.gmail.com", 587) as server:
-        server.starttls()
-        server.login(sender, password)
-        server.send_message(msg)
-    print("✅ Email sent.")
-    print(f"📤 Sent snippet:\n{chosen}")
-except Exception as e:
-    print(f"❌ Email error: {e}")
+context = ssl.create_default_context()
+with smtplib.SMTP_SSL("smtp.gmail.com", 465, context=context) as server:
+    server.login(EMAIL_USER, EMAIL_PASS)
+    server.sendmail(EMAIL_USER, EMAIL_RECEIVER, msg.as_string())
+
+# Log
+print(f"🧪 Total snippets found: {len(blocks)}")
+print(f"📤 Sent snippet:\n{snippet}")
