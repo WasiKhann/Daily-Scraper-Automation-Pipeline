@@ -10,44 +10,41 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
+      - name: ✅ Checkout repository
         uses: actions/checkout@v3
 
-      - name: Set up Node.js
+      - name: 🟢 Set up Node.js
         uses: actions/setup-node@v3
         with:
           node-version: 18
 
-      - name: Install Playwright
+      - name: 📦 Install Playwright
         run: |
           npm init -y
           npm install playwright
           npx playwright install
 
-      - name: Scrape Notion page
+      - name: 🧠 Scrape Notion page
         run: node scrape_notion.js
 
-      - name: Set up Python
+      - name: 📄 Show scraped Notion content
+        run: cat notion.txt || echo "❌ notion.txt not found"
+
+      - name: 🐍 Set up Python
         uses: actions/setup-python@v4
         with:
           python-version: '3.10'
 
-      - name: Install Python dependencies
-        run: pip install --upgrade pip  # No extra packages needed, but kept for safety
+      - name: 🔍 Install Python dependencies
+        run: pip install --upgrade pip  # No external packages needed
 
-      - name: Parse and select a snippet
+      - name: ✂️ Parse and select a snippet
         run: python parse_and_pick.py
 
-      - name: 🧪 Debug: Check notion.txt & picked_snippet.txt
-        run: |
-          echo "📄 notion.txt:"
-          cat notion.txt || echo "❌ not found"
-          
-          echo -e "\n📄 picked_snippet.txt:"
-          cat picked_snippet.txt || echo "❌ not found"
+      - name: 📋 Show picked snippet
+        run: cat picked_snippet.txt || echo "❌ picked_snippet.txt not found"
 
-
-      - name: Send email
+      - name: 📬 Send email
         env:
           EMAIL_USER: ${{ secrets.EMAIL_USER }}
           EMAIL_PASS: ${{ secrets.EMAIL_PASS }}
