@@ -26,8 +26,10 @@ snippets = [s for s in snippets if s]
 # Print how many and one random
 print(f"🧪 Found {len(snippets)} valid snippets.\n")
 chosen = random.choice(snippets)
+
+print("🎯 Selected snippet:\n")
+print(chosen)
+
 # Save chosen snippet for email script
 with open("picked_snippet.txt", "w", encoding="utf-8") as f:
     f.write(chosen)
-print("🎯 Selected snippet:\n")
-print(chosen)
