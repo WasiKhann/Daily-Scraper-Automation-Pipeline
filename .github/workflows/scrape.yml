@@ -27,16 +27,16 @@ jobs:
       - name: Scrape Notion page
         run: node scrape_notion.js
 
-      - name: 📄 Show scraped Notion content
-        run: |
-          echo "-------- NOTION.TXT START --------"
-          cat notion.txt
-          echo "-------- NOTION.TXT END ----------"
-
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
           python-version: '3.10'
+
+      - name: Install Python dependencies
+        run: pip install --upgrade pip  # No extra packages needed, but kept for safety
+
+      - name: Parse and select a snippet
+        run: python parse_and_pick.py
 
       - name: Send email
         env:
