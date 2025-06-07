@@ -2,37 +2,63 @@ import smtplib, ssl, os, random
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 
-# Load credentials
+# 👇 Adjustable: How many snippets you want in the email
+NUM_SNIPPETS = 3  # Change this to 1, 2, 3...
+
+# Load email credentials from environment variables
 EMAIL_USER = os.getenv("EMAIL_USER")
 EMAIL_PASS = os.getenv("EMAIL_PASS")
 EMAIL_RECEIVER = os.getenv("EMAIL_RECEIVER")
 
-# Read content
+# Read the entire content of notion.txt
 with open("notion.txt", "r", encoding="utf-8") as f:
     content = f.read()
 
-# Split into snippets using ".." as a separator
-snippets = [s.strip() for s in content.split('..') if s.strip()]
+# Normalize line endings
+content = content.replace("\r\n", "\n").replace("\r", "\n")
+lines = content.split("\n")
+snippets = []
+current = []
 
-# Ensure we have snippets
+# Split by lines that equal ".."
+for line in lines:
+    if line.strip() == "..":
+        if current:
+            snippet = "\n".join(current).strip()
+            if snippet:
+                snippets.append(snippet)
+            current = []
+    else:
+        current.append(line)
+if current:
+    snippet = "\n".join(current).strip()
+    if snippet:
+        snippets.append(snippet)
+
 if not snippets:
-    raise Exception("❌ No snippets found. Check notion.txt formatting.")
+    raise Exception("❌ No snippets found. Check that notion.txt contains separator lines with '..'.")
 
-# Choose a random one
-chosen = random.choice(snippets)
+print(f"🧪 Found {len(snippets)} valid snippet(s).")
 
-# Compose email
+# Choose random N snippets (limit to available number)
+selected = random.sample(snippets, min(NUM_SNIPPETS, len(snippets)))
+
+# Join them with separator
+joined = "\n\n---\nIn other news...\n\n".join(selected)
+
+# Compose the email
 msg = MIMEMultipart()
 msg["From"] = EMAIL_USER
 msg["To"] = EMAIL_RECEIVER
 msg["Subject"] = "🌙 Your Daily Islamic Reminder"
-msg.attach(MIMEText(chosen, "plain"))
+msg.attach(MIMEText(joined, "plain"))
 
-# Send email
+# Send the email
 context = ssl.create_default_context()
 with smtplib.SMTP_SSL("smtp.gmail.com", 465, context=context) as server:
     server.login(EMAIL_USER, EMAIL_PASS)
     server.sendmail(EMAIL_USER, EMAIL_RECEIVER, msg.as_string())
 
-print("✅ Email sent.")
-print("--- Sent Snippet ---\n", chosen)
+print("✅ Email sent successfully.")
+print("📤 Sent content:\n")
+print(joined)
