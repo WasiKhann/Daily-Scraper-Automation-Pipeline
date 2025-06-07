@@ -38,6 +38,15 @@ jobs:
       - name: Parse and select a snippet
         run: python parse_and_pick.py
 
+      - name: 🧪 Debug: Check notion.txt & picked_snippet.txt
+        run: |
+          echo "📄 notion.txt:"
+          cat notion.txt || echo "❌ not found"
+          
+          echo -e "\n📄 picked_snippet.txt:"
+          cat picked_snippet.txt || echo "❌ not found"
+
+
       - name: Send email
         env:
           EMAIL_USER: ${{ secrets.EMAIL_USER }}
