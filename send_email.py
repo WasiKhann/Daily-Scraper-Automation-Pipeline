@@ -11,12 +11,14 @@ EMAIL_RECEIVER = os.getenv("EMAIL_RECEIVER")
 with open("notion.txt", "r", encoding="utf-8") as f:
     content = f.read()
 
-# Split into snippets using 2 or more newlines (paragraphs)
-snippets = [s.strip() for s in content.split('\n\n') if s.strip()]
+# Split into snippets using ".." as a separator
+snippets = [s.strip() for s in content.split('..') if s.strip()]
 
-# Choose a random one
+# Ensure we have snippets
 if not snippets:
     raise Exception("❌ No snippets found. Check notion.txt formatting.")
+
+# Choose a random one
 chosen = random.choice(snippets)
 
 # Compose email
