@@ -16,6 +16,10 @@ snippets = re.split(r'\n{3,}', all_text)
 snippets = [s.strip() for s in snippets if s.strip()]
 
 # Pick a random snippet
+print(f"\n🧪 Total snippets found: {len(snippets)}")
+for i, s in enumerate(snippets, 1):
+    print(f"\n--- Snippet {i} ---\n{s}\n")
+
 chosen = random.choice(snippets)
 
 # Setup email
