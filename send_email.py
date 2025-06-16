@@ -3,7 +3,7 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 
 # 👇 Adjustable: How many snippets you want in the email
-NUM_SNIPPETS = 3  # Change this to 1, 2, 3...
+NUM_SNIPPETS = 5  # Change this to 1, 2, 3...
 
 # Load email credentials from environment variables
 EMAIL_USER = os.getenv("EMAIL_USER")
