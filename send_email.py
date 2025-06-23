@@ -48,8 +48,9 @@ print(f"🧪 Found {len(snippets)} valid snippet(s).")
 # Choose random N snippets (limit to available number)
 selected_snippets = random.sample(snippets, min(NUM_SNIPPETS, len(snippets)))
 
-# Join them for the email body
-email_body = "\n\n---\nIn other news...\n\n".join(selected_snippets)
+# Join them for the email body AND Telegram message
+# THIS IS THE ONLY LINE THAT NEEDS TO CHANGE SIGNIFICANTLY
+full_message_content = "\n\n---\nIn other news...\n\n".join(selected_snippets) # <--- Renamed variable and used for both
 
 # --- Send Email ---
 if EMAIL_USER and EMAIL_PASS and EMAIL_RECEIVER:
@@ -58,7 +59,7 @@ if EMAIL_USER and EMAIL_PASS and EMAIL_RECEIVER:
     msg["From"] = EMAIL_USER
     msg["To"] = EMAIL_RECEIVER
     msg["Subject"] = "🌙 Your Daily Islamic Reminder"
-    msg.attach(MIMEText(email_body, "plain"))
+    msg.attach(MIMEText(full_message_content, "plain")) # <--- Used new variable here
 
     try:
         context = ssl.create_default_context()
@@ -67,7 +68,7 @@ if EMAIL_USER and EMAIL_PASS and EMAIL_RECEIVER:
             server.sendmail(EMAIL_USER, EMAIL_RECEIVER, msg.as_string())
         print("✅ Email sent successfully.")
         print("📤 Sent content:\n")
-        print(email_body)
+        print(full_message_content) # <--- Used new variable here
     except Exception as e:
         print(f"❌ Failed to send email: {e}")
 else:
@@ -76,16 +77,16 @@ else:
 # --- Send Telegram Message ---
 if TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID:
     print("\n✈️ Preparing to send Telegram message...")
-    # We'll just send the first snippet to Telegram for brevity
-    telegram_message = selected_snippets[0]
-    
+    # Now using the same full content for Telegram
+    telegram_message = full_message_content # <--- THIS IS THE KEY CHANGE
+
     url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage"
     params = {
         "chat_id": TELEGRAM_CHAT_ID,
         "text": telegram_message,
         "parse_mode": "Markdown"  # Or "HTML" if you prefer
     }
-    
+
     try:
         response = requests.get(url, params=params)
         if response.status_code == 200:
