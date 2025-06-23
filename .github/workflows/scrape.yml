@@ -25,6 +25,8 @@ jobs:
           npx playwright install
 
       - name: Scrape Notion page
+        env: # <--- Add this env block
+          NOTION_PAGE_URL: ${{ secrets.NOTION_PAGE_URL }} # <--- Pass the secret here
         run: node scrape_notion.js
 
       - name: Set up Python
