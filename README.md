@@ -1,19 +1,11 @@
-# Daily Notion Islamic Page Emailer
-
-- Python script that runs daily through Github actions.
-- Parses my public Islamic notion private site(divides according to empty space in between).
-- Emails me a random snippet.
-
-Alhumdullilah!
-
-# 🌙 Daily Islamic Reminder Automation
+ # 🌙 Daily Islamic Reminder Automation
 
 ## Project Overview
 
 This project automates the process of delivering daily Islamic reminders from a Notion page directly to my email inbox and Telegram chat. Leveraging GitHub Actions for scheduled execution, Node.js with Playwright for web scraping, and Python for data parsing and multi-platform notification delivery, this solution ensures I receive curated spiritual content consistently.
 
 This project demonstrates practical skills in:
-* **Web Scraping:** Using Playwright to extract dynamic content from web pages.
+* **Web Scraping:** Using Playwright to extract dynamic content from Notion web page.
 * **Workflow Automation:** Orchestrating a multi-step process with GitHub Actions for reliable scheduling.
 * **Cross-Platform Notification:** Sending personalized messages via Email (SMTP) and Telegram Bot API.
 * **Data Parsing & Manipulation:** Extracting and structuring text data from raw scraped content.
