@@ -5,7 +5,15 @@ const { chromium } = require('playwright');
   const browser = await chromium.launch();
   const page = await browser.newPage();
 
-  const url = 'NOTION_PAGE_LINK';
+  // Read the URL from environment variable
+  const url = process.env.NOTION_PAGE_URL; // <--- CHANGE THIS LINE
+
+  if (!url) { // <--- Optional: Add a check to ensure the URL is present
+    console.error("❌ ERROR: NOTION_PAGE_URL environment variable is not set!");
+    await browser.close();
+    process.exit(1); // Exit with an error code
+  }
+
   await page.goto(url, { waitUntil: 'domcontentloaded' });
   await page.waitForTimeout(5000); // Let Notion fully render
 
