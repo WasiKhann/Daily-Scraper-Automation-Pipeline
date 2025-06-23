@@ -5,7 +5,7 @@ const { chromium } = require('playwright');
   const browser = await chromium.launch();
   const page = await browser.newPage();
 
-  const url = 'https://wasikhan.notion.site/Most-imp-Notion-page-will-take-me-into-jannah-IA-1b51284063e7805fb121cac3d3104bc3';
+  const url = 'NOTION_PAGE_LINK';
   await page.goto(url, { waitUntil: 'domcontentloaded' });
   await page.waitForTimeout(5000); // Let Notion fully render
 
