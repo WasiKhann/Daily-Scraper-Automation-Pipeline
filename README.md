@@ -118,6 +118,6 @@ Distributed under the MIT License. See `LICENSE` for more information. (You migh
 
 ## Contact
 
-[Your Name/Handle] - [Your LinkedIn Profile URL] - [Your Email Address]
+Wasi Khan - [LinkedIn](https://www.linkedin.com/in/wasi-khann/) - wasitahirkhan@gmail.com
 
-Project Link: [Your GitHub Repository URL]
+Project Link: [Daily Islamic Reminder Automation](https://github.com/WasiKhann/Daily-Islamic-Reminder-Automation)
