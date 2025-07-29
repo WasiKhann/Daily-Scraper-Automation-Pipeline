@@ -25,8 +25,8 @@ jobs:
           npx playwright install
 
       - name: Scrape Notion page
-        env: # <--- Add this env block
-          NOTION_PAGE_URL: ${{ secrets.NOTION_PAGE_URL }} # <--- Pass the secret here
+        env:
+          NOTION_PAGE_URL: ${{ secrets.NOTION_PAGE_URL }}
         run: node scrape_notion.js
 
       - name: Set up Python
@@ -44,4 +44,114 @@ jobs:
           EMAIL_RECEIVER: ${{ secrets.EMAIL_RECEIVER }}
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
-        run: python send_email.py
+          # --- CHANGE THIS LINE ---
+          TELEGRAM_GROUP_CHAT_ID: ${{ secrets.TELEGRAM_GROUP_CHAT_ID }}
+        run: python send_email.py```
+
+---
+
+### Step 2: Update the Python Script (`send_email.py`)
+
+**File to edit:** `send_email.py`
+
+In the script, change the environment variable it looks for from `TELEGRAM_CHAT_ID_2` to `TELEGRAM_GROUP_CHAT_ID`.
+
+```python
+import smtplib, ssl, os, random, requests
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
+
+# --- Settings ---
+# Adjustable: How many snippets you want in the email
+NUM_SNIPPETS = 5
+
+# --- Load Credentials ---
+EMAIL_USER = os.getenv("EMAIL_USER")
+EMAIL_PASS = os.getenv("EMAIL_PASS")
+EMAIL_RECEIVER = os.getenv("EMAIL_RECEIVER")
+TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
+
+# --- Load all potential Telegram Chat IDs ---
+TELEGRAM_CHAT_IDS = []
+if os.getenv("TELEGRAM_CHAT_ID"):
+    TELEGRAM_CHAT_IDS.append(os.getenv("TELEGRAM_CHAT_ID"))
+# --- CHANGE THIS LINE ---
+if os.getenv("TELEGRAM_GROUP_CHAT_ID"):
+    TELEGRAM_CHAT_IDS.append(os.getenv("TELEGRAM_GROUP_CHAT_ID"))
+
+# --- Snippet Parsing ---
+with open("notion.txt", "r", encoding="utf-8") as f:
+    content = f.read()
+
+content = content.replace("\r\n", "\n").replace("\r", "\n")
+lines = content.split("\n")
+snippets = []
+current = []
+
+for line in lines:
+    if line.strip() == "..":
+        if current:
+            snippet = "\n".join(current).strip()
+            if snippet:
+                snippets.append(snippet)
+            current = []
+    else:
+        current.append(line)
+if current:
+    snippet = "\n".join(current).strip()
+    if snippet:
+        snippets.append(snippet)
+
+if not snippets:
+    raise Exception("❌ No snippets found. Check that notion.txt contains separator lines with '..'.")
+
+print(f"🧪 Found {len(snippets)} valid snippet(s).")
+
+# --- Select and Prepare Content ---
+selected_snippets = random.sample(snippets, min(NUM_SNIPPETS, len(snippets)))
+full_message_content = "\n\n---\nIn other news...\n\n".join(selected_snippets)
+
+# --- Send Email ---
+if EMAIL_USER and EMAIL_PASS and EMAIL_RECEIVER:
+    print("\n📬 Preparing to send email...")
+    msg = MIMEMultipart()
+    msg["From"] = EMAIL_USER
+    msg["To"] = EMAIL_RECEIVER
+    msg["Subject"] = "🌙 Your Daily Islamic Reminder"
+    msg.attach(MIMEText(full_message_content, "plain"))
+    try:
+        context = ssl.create_default_context()
+        with smtplib.SMTP_SSL("smtp.gmail.com", 465, context=context) as server:
+            server.login(EMAIL_USER, EMAIL_PASS)
+            server.sendmail(EMAIL_USER, EMAIL_RECEIVER, msg.as_string())
+        print("✅ Email sent successfully.")
+        print("📤 Sent content:\n")
+        print(full_message_content)
+    except Exception as e:
+        print(f"❌ Failed to send email: {e}")
+else:
+    print("⚠️ Email credentials not found. Skipping email.")
+
+# --- Send Telegram Message ---
+if TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_IDS:
+    print(f"\n✈️ Preparing to send Telegram message to {len(TELEGRAM_CHAT_IDS)} chat(s)...")
+    url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage"
+    for chat_id in TELEGRAM_CHAT_IDS:
+        print(f"  -> Sending to Chat ID: ...{chat_id[-4:]}")
+        params = {
+            "chat_id": chat_id,
+            "text": full_message_content,
+            "parse_mode": "Markdown"
+        }
+        try:
+            response = requests.get(url, params=params)
+            if response.status_code == 200:
+                print(f"  ✅ Telegram message sent successfully to ...{chat_id[-4:]}.")
+            else:
+                print(f"  ❌ Failed to send to ...{chat_id[-4:]}. Status: {response.status_code}, Response: {response.text}")
+        except Exception as e:
+            print(f"  ❌ Failed to send Telegram message to ...{chat_id[-4:]}: {e}")
+    print("\n📤 Sent content:\n")
+    print(full_message_content)
+else:
+    print("⚠️ Telegram credentials not found or no chat IDs provided. Skipping Telegram message.")
